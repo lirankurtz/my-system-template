@@ -1,0 +1,288 @@
+# Project Blueprint & Agent Contract
+
+This file is the single source of truth for all Claude Code agents working on this project.
+**Read this fully before writing any code.**
+
+---
+
+## Stack (non-negotiable)
+
+| Layer | Choice |
+|---|---|
+| Frontend | React + Vite + TailwindCSS |
+| Backend | Node.js + Express (or Fastify) |
+| Database | Cloud SQL (Postgres) + Prisma |
+| Auth | Firebase Auth |
+| Real-time | Firestore (chat/presence) or SSE |
+| Infra | Terraform → GCP |
+| Hosting | Cloud Run (API), Vercel or Firebase Hosting (web) |
+| Monorepo | npm workspaces |
+
+---
+
+## Repo Structure
+
+```
+/
+├── packages/
+│   └── shared/               # Shared types + API contract — source of truth
+│       ├── package.json      # name: "@myapp/shared"
+│       └── src/
+│           ├── types/
+│           │   ├── user.ts
+│           │   └── api.ts
+│           └── api-contract.ts
+├── apps/
+│   ├── api/                  # Express + Prisma (Agent 2)
+│   │   └── prisma/           # schema.prisma + migrations (Agent 3)
+│   └── web/                  # React + Vite (Agent 4)
+├── integrations/
+│   ├── stripe/               # Webhook receiver + idempotency (Agent 5)
+│   ├── llm/                  # Provider-agnostic wrapper (Agent 5)
+│   └── email/                # Resend/SendGrid abstraction (Agent 5)
+├── infra/
+│   └── terraform/            # All GCP infrastructure (Agent 1)
+└── AGENTS.md                 # This file
+```
+
+---
+
+## Agents & Ownership
+
+### Agent 1 — Infra
+- **Owns:** `/infra/terraform`
+- **Delivers:** Cloud Run service, Cloud SQL instance, networking, secrets, IAM
+- **Depends on:** Nothing (runs in Phase 1)
+- **Exposes:** Connection strings + service URLs as Terraform outputs
+- **Must not touch:** Any app code
+
+### Agent 2 — API
+- **Owns:** `/apps/api` (excluding `/apps/api/prisma`)
+- **Delivers:** Express app, all route handlers, Firebase auth middleware, error handling
+- **Depends on:** `@myapp/shared`, Prisma client from Agent 3
+- **Exposes:** REST API matching the contract below
+- **Must not touch:** Frontend, Prisma schema, infra
+
+### Agent 3 — DB / Schema
+- **Owns:** `/apps/api/prisma`
+- **Delivers:** `schema.prisma`, all migrations, seed script
+- **Depends on:** Entity definitions in shared contract
+- **Exposes:** Prisma client (consumed by Agent 2)
+- **Must not touch:** Route logic, frontend, infra
+
+### Agent 4 — Frontend
+- **Owns:** `/apps/web`
+- **Delivers:** React + Vite shell, Firebase auth context, protected routes, API client layer
+- **Depends on:** `@myapp/shared`, API contract
+- **Exposes:** Nothing (leaf node)
+- **Must not touch:** API code, DB, infra
+
+### Agent 5 — Integrations
+- **Owns:** `/integrations`
+- **Delivers:** Stripe stub, LLM wrapper, email abstraction
+- **Depends on:** `@myapp/shared` types only
+- **Exposes:** Typed integration clients, consumed by Agent 2
+- **Must not touch:** App code, infra
+
+---
+
+## Shared Types (packages/shared)
+
+### User
+
+```typescript
+// packages/shared/src/types/user.ts
+export interface User {
+  id: string           // Firebase UID — primary key everywhere
+  email: string
+  displayName: string | null
+  createdAt: string    // ISO 8601
+}
+```
+
+### API Envelope
+
+```typescript
+// packages/shared/src/types/api.ts
+export interface ApiResponse<T> {
+  data: T | null
+  error: ApiError | null
+}
+
+export interface ApiError {
+  code: string         // machine-readable e.g. "AUTH_EXPIRED", "NOT_FOUND"
+  message: string      // human-readable
+  status: number       // HTTP status code
+}
+```
+
+### Auth Contract
+
+```typescript
+// packages/shared/src/types/auth.ts
+// Shape attached to every verified request by the auth middleware
+export interface AuthenticatedRequest extends Request {
+  uid: string          // Firebase UID, verified server-side
+  email: string
+}
+```
+
+### API Route Contract
+
+```typescript
+// packages/shared/src/api-contract.ts
+export const API_ROUTES = {
+  users: {
+    me:     { method: 'GET',  path: '/api/users/me' },
+    update: { method: 'PUT',  path: '/api/users/me' },
+  },
+  chat: {
+    rooms:    { method: 'GET',  path: '/api/chat/rooms' },
+    messages: { method: 'GET',  path: '/api/chat/rooms/:id/messages' },
+    send:     { method: 'POST', path: '/api/chat/rooms/:id/messages' },
+  },
+} as const
+```
+
+---
+
+## Prisma Schema
+
+```prisma
+// apps/api/prisma/schema.prisma
+
+model User {
+  id          String       @id           // Firebase UID
+  email       String       @unique
+  displayName String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  messages    Message[]
+  rooms       RoomMember[]
+}
+
+model Room {
+  id        String       @id @default(cuid())
+  name      String
+  createdAt DateTime     @default(now())
+  members   RoomMember[]
+  messages  Message[]
+}
+
+model RoomMember {
+  userId   String
+  roomId   String
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  room     Room     @relation(fields: [roomId], references: [id])
+  @@id([userId, roomId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+```
+
+---
+
+## Auth Flow (end to end)
+
+1. User signs in via **Firebase Auth SDK** on the frontend
+2. Frontend gets a Firebase **ID token** (JWT), refreshed automatically by the SDK
+3. Every API request includes `Authorization: Bearer <id_token>`
+4. Express **auth middleware** calls `firebase-admin.auth().verifyIdToken(token)`
+5. On success, middleware attaches `{ uid, email }` to the request object
+6. If the user doesn't exist in Postgres yet, the middleware upserts them (first-login provisioning)
+7. All downstream route handlers trust `req.uid` — never accept uid from the request body
+
+---
+
+## Error Handling Rules
+
+- All errors return `ApiResponse<null>` with a populated `error` field
+- Use consistent `code` strings — define them in `packages/shared/src/types/errors.ts`
+- HTTP 4xx for client errors, 5xx for server errors — never 200 with an error body
+- Auth failures are always `401`, authorization failures are `403`
+
+---
+
+## Environment Variables
+
+- Never hardcode secrets or config
+- `.env` files are local only, never committed
+- Terraform outputs populate infra secrets (DB URL, service account keys)
+- Each app has its own `.env.example` committed to the repo
+
+```
+# apps/api/.env.example
+DATABASE_URL=
+FIREBASE_PROJECT_ID=
+FIREBASE_PRIVATE_KEY=
+FIREBASE_CLIENT_EMAIL=
+PORT=8080
+
+# apps/web/.env.example
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_API_BASE_URL=
+```
+
+---
+
+## Build & Run Conventions
+
+```bash
+# From repo root
+npm install              # installs all workspaces
+npm run dev -w api       # run API dev server
+npm run dev -w web       # run web dev server
+
+# DB
+cd apps/api
+npx prisma migrate dev   # apply + generate
+npx prisma db seed       # seed local DB
+```
+
+---
+
+## Execution Phases
+
+### Phase 0 — You, manually (~2 hrs)
+- [ ] Init monorepo (`npm workspaces`)
+- [ ] Write `packages/shared` fully (types + contract)
+- [ ] Lock Prisma schema
+- [ ] Create GCP project, enable Cloud Run + Cloud SQL APIs
+- [ ] Write `.env.example` files
+
+### Phase 1 — Parallel (all agents independent)
+- Agent 1: Terraform infra
+- Agent 3: Prisma schema + migrations + seed
+- Agent 5: Integration stubs (Stripe, LLM, email)
+
+### Phase 2 — Agent 2 (unblocked after Phase 1)
+- Express app wired to real DB
+- Firebase auth middleware
+- All routes implemented against contract
+
+### Phase 3 — Agent 4 (unblocked after Phase 2)
+- React shell + auth context
+- Protected routes
+- API client layer consuming `@myapp/shared` contract
+
+---
+
+## Golden Rules
+
+1. **Import from `@myapp/shared`, never redefine types locally**
+2. **The Prisma schema is the DB source of truth — no raw SQL migrations**
+3. **Auth middleware is the only place Firebase is called on the backend**
+4. **Every API response uses the `ApiResponse<T>` envelope — no exceptions**
+5. **No agent touches another agent's directory**
+6. **If a contract needs to change, update `packages/shared` first, then notify all agents**

@@ -1,0 +1,15 @@
+{
+  "name": "my-app",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "integrations"
+  ],
+  "scripts": {
+    "dev:api": "npm run dev -w @myapp/api",
+    "dev:web": "npm run dev -w @myapp/web",
+    "build": "npm run build -w @myapp/api && npm run build -w @myapp/web"
+  }
+}
