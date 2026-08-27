@@ -254,27 +254,48 @@ npx prisma db seed       # seed local DB
 
 ## Execution Phases
 
-### Phase 0 — You, manually (~2 hrs)
-- [ ] Init monorepo (`npm workspaces`)
-- [ ] Write `packages/shared` fully (types + contract)
-- [ ] Lock Prisma schema
-- [ ] Create GCP project, enable Cloud Run + Cloud SQL APIs
-- [ ] Write `.env.example` files
+### Phase 0 — Setup (COMPLETE ✅)
+- [x] Init monorepo (`npm workspaces`)
+- [x] Write `packages/shared` fully (types + contract)
+- [x] Lock Prisma schema
+- [x] Create GCP project, enable APIs
+- [x] Write `.env.example` files
+- [x] Set up `.env` files with Firebase & GCP credentials
+- [x] Create Terraform scaffolding
+
+**Status:** Monorepo ready, credentials configured, Terraform ready for deployment
 
 ### Phase 1 — Parallel (all agents independent)
-- Agent 1: Terraform infra
-- Agent 3: Prisma schema + migrations + seed
-- Agent 5: Integration stubs (Stripe, LLM, email)
+
+#### Agent 1: Terraform Infrastructure
+- [ ] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
+- [ ] Run `terraform init` → `terraform plan` → `terraform apply`
+- [ ] Output `DATABASE_URL` and credentials
+- **Deliverable:** Cloud SQL Postgres instance, service account for Cloud Run
+
+#### Agent 3: Database / Prisma
+- [ ] Wait for `DATABASE_URL` from Agent 1
+- [ ] Run `npx prisma migrate dev`
+- [ ] Create seed script (`prisma/seed.ts`)
+- **Deliverable:** Migrations applied, seeded data ready
+
+#### Agent 5: Integrations
+- [ ] Create Stripe webhook receiver stub
+- [ ] Create LLM provider-agnostic wrapper
+- [ ] Create email abstraction (Resend/SendGrid)
+- **Deliverable:** Typed integration clients in `/integrations`
 
 ### Phase 2 — Agent 2 (unblocked after Phase 1)
 - Express app wired to real DB
 - Firebase auth middleware
 - All routes implemented against contract
+- **Blockers:** DATABASE_URL from Agent 1
 
 ### Phase 3 — Agent 4 (unblocked after Phase 2)
 - React shell + auth context
 - Protected routes
 - API client layer consuming `@myapp/shared` contract
+- **Blockers:** API endpoints from Agent 2
 
 ---
 
