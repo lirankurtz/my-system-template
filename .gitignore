@@ -8,6 +8,10 @@ yarn.lock
 .env.local
 .env.*.local
 
+# Service accounts & credentials
+*-sa.json
+terraform-sa.json
+
 # Build outputs
 dist/
 build/
