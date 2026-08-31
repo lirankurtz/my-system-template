@@ -300,38 +300,44 @@ npx prisma db seed       # seed local DB
 - **Deliverable:** Typed integration clients in `/integrations` (all 3 packages, built and type-checked)
 - **Stacked PR:** #6 (stripe, llm, email integration packages)
 
-### Phase 2 — Agent 2 (unblocked after Phase 1)
-- Express app wired to real DB
-- Firebase auth middleware
-- All routes implemented against contract
-- **Blockers:** DATABASE_URL from Agent 1 ✅ Ready
+### Phase 2 — Agent 2 ✅ COMPLETE
 
-**Status:** ⏳ IN PROGRESS — awaiting Agent 2 implementation
+**Status:** MERGED (PR #8)
 
-### Phase 3 — Agent 4 (unblocked after Phase 2)
+**Deliverables:**
+- [x] Express app wired to real DB (Prisma client)
+- [x] Firebase auth middleware (verifies ID tokens, auto-provisions users)
+- [x] All 5 routes implemented against contract
+  - `GET /api/users/me` — Fetch authenticated user
+  - `PUT /api/users/me` — Update user displayName
+  - `GET /api/chat/rooms` — List user's chat rooms
+  - `GET /api/chat/rooms/:id/messages` — Fetch room messages
+  - `POST /api/chat/rooms/:id/messages` — Send message
+- [x] Consistent error handling (`ApiResponse<T>` envelope)
+- [x] Authorization checks (room membership validation)
+- **Stacked PR:** #8 (API implementation complete)
 
-**Status:** 🔧 SCAFFOLDING COMPLETE — awaiting Agent 2 API routes
+### Phase 3 — Agent 4 ✅ SCAFFOLDING → INTEGRATION IN PROGRESS
 
-**Summary:**
-- Vite + React project setup with TypeScript
-- Firebase Auth integration with AuthContext provider
-- Protected routes with ProtectedRoute component
-- API client layer with automatic token injection
-- Login page (sign-in/sign-up)
-- Dashboard page (user profile + chat placeholder)
+**Status:** MERGED Scaffolding (PR #9) — now integrating with Agent 2 API routes
 
-#### Agent 4: Frontend 🔧 IN PROGRESS
-- [x] Create Vite + React project structure
-- [x] Configure TypeScript strict mode
-- [x] Set up Firebase Auth context and providers
-- [x] Create ProtectedRoute component with auth guards
-- [x] Build API client layer (automatic Bearer token injection)
-- [x] Create login page (Firebase email/password auth)
-- [x] Create dashboard page (profile fetching)
-- [ ] Integrate with Agent 2's chat API routes (blocked by Agent 2)
-- **Deliverable:** React + Vite shell with auth flow, API client layer, protected routing
-- **Blockers:** API routes from Agent 2 — awaiting PR with `/api/users/me`, `/api/chat/*` endpoints
-- **Stacked PR:** Pending (will be stacked after scaffolding review)
+**Deliverables:**
+- [x] Vite + React project setup with TypeScript
+- [x] Firebase Auth integration with AuthContext provider
+- [x] Protected routes with ProtectedRoute component
+- [x] API client layer with automatic token injection
+- [x] Login page (sign-in/sign-up)
+- [x] Dashboard page (user profile + chat placeholder)
+- 🔄 Chat integration (consuming Agent 2's `/api/chat/*` routes)
+- **Stacked PR:** #9 (Frontend scaffolding with auth, integrating chat routes)
+
+#### Agent 4: Frontend — Integration Phase
+- [x] Scaffolding & auth complete (PR #9)
+- 🔄 Building chat UI (rooms list, messages, send message)
+- 🔄 Connecting to Agent 2's chat API routes
+- [ ] Real-time updates (SSE listeners or Firestore integration)
+- **Blockers:** None — API endpoints ready (PR #8 merged)
+- **Next:** Chat UI integration, real-time features
 
 ---
 
