@@ -65,10 +65,11 @@ resource "random_password" "db_password" {
 }
 
 # Service account for Cloud Run API
-resource "google_service_account" "cloud_run" {
-  account_id   = "cloud-run-api"
-  display_name = "Cloud Run API Service Account"
-}
+# TODO: Create in Phase 2 (requires elevated IAM permissions)
+# resource "google_service_account" "cloud_run" {
+#   account_id   = "cloud-run-api"
+#   display_name = "Cloud Run API Service Account"
+# }
 
 # Cloud Run Service (placeholder - Agent 2 will populate this)
 # resource "google_cloud_run_service" "api" {

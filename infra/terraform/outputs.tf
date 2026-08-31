@@ -30,7 +30,8 @@ output "database_name" {
   value       = google_sql_database.app_db.name
 }
 
-output "cloud_run_service_account_email" {
-  description = "Service account email for Cloud Run"
-  value       = google_service_account.cloud_run.email
-}
+# TODO: Create service account in Phase 2 (requires elevated IAM permissions)
+# output "cloud_run_service_account_email" {
+#   description = "Service account email for Cloud Run"
+#   value       = google_service_account.cloud_run.email
+# }
