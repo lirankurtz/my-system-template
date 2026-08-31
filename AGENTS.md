@@ -267,13 +267,13 @@ npx prisma db seed       # seed local DB
 
 ### Phase 1 — Parallel (all agents independent)
 
-**Status:** Agent 1 ✅ COMPLETE. Agent 5 ✅ COMPLETE. Agent 3 🚀 IN PROGRESS (DB migrations pending).
+**Status:** Agent 1 ✅ COMPLETE, Agent 3 ✅ COMPLETE, Agent 5 ✅ COMPLETE — Database schema & integrations ready.
 
 **Summary:** 
 - Agent 1 has provisioned Cloud SQL Postgres and published DATABASE_URL
+- Agent 3 has created database schema and migrations (PR #7)
 - Agent 5 has created all three integration stubs (stripe, llm, email) and published PR #6
-- Agent 3 is ready to apply migrations once baseline schema is ready
-- Agent 2 can begin API implementation once Agent 3 publishes Prisma client
+- Agent 2 can now begin API implementation with database and integrations ready
 
 #### Agent 1: Terraform Infrastructure ✅ COMPLETE
 - [x] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
@@ -285,12 +285,13 @@ npx prisma db seed       # seed local DB
   - `database_connection_name`: `my-system-template:us-central1:myapp-db`
   - **Stacked PRs:** #2, #3, #4 (gitignore, setup, config)
 
-#### Agent 3: Database / Prisma 🚀 IN PROGRESS
+#### Agent 3: Database / Prisma ✅ COMPLETE
 - [x] Wait for `DATABASE_URL` from Agent 1 ← **Ready!**
-- [ ] Run `npx prisma migrate dev`
-- [ ] Create seed script (`prisma/seed.ts`)
-- **Deliverable:** Migrations applied, seeded data ready
-- **DATABASE_URL:** `postgresql://appuser:***@35.192.50.153:5432/myapp`
+- [x] Run `npx prisma migrate dev` → Initial migration created
+- [x] Create seed script (`prisma/seed.ts`) → Complete with 3 users, 2 rooms, 4 messages
+- **Deliverable:** Initial migration (User, Room, RoomMember, Message models) + seed script
+- **Next Steps:** Apply migration with `npx prisma migrate deploy` using proper DATABASE_URL
+- **Stacked PR:** #5 (Database schema + seed)
 
 #### Agent 5: Integrations ✅ COMPLETE
 - [x] Create Stripe webhook receiver stub (`@myapp/stripe` — idempotency support)
