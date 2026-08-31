@@ -6,10 +6,11 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "gcs" {
-    bucket = "my-system-template-tf-state"
-    prefix = "prod"
-  }
+  # TODO: Migrate to GCS backend after initial setup
+  # backend "gcs" {
+  #   bucket = "my-system-template-tf-state"
+  #   prefix = "prod"
+  # }
 }
 
 provider "google" {
