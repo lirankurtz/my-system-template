@@ -15,7 +15,7 @@ This file is the single source of truth for all Claude Code agents working on th
 | Auth | Firebase Auth |
 | Real-time | Firestore (chat/presence) or SSE |
 | Infra | Terraform → GCP |
-| Hosting | Cloud Run (API), Vercel or Firebase Hosting (web) |
+| Hosting | Cloud Run (API), Firebase Hosting (web) |
 | Monorepo | npm workspaces |
 
 ---
@@ -265,7 +265,7 @@ npx prisma db seed       # seed local DB
 
 **Status:** Monorepo ready, credentials configured, Terraform ready for deployment
 
-### Phase 1 — Parallel (all agents independent)
+### Phase 1 — Parallel (all agents independent) ✅ COMPLETE
 
 **Status:** Agent 1 ✅ COMPLETE, Agent 3 ✅ COMPLETE, Agent 5 ✅ COMPLETE — Database schema & integrations ready.
 
@@ -354,6 +354,60 @@ npx prisma db seed       # seed local DB
 - **PR:** #9 (Phase 3: Agent 4 - React + Vite frontend)
 - **Dev Server:** http://localhost:5173
 - **Stacked PR:** Pending (will be stacked after scaffolding review)
+
+### Phase 4 — Deployment 🚀 IN PROGRESS
+
+**Status:** All code complete. Infrastructure ready. Dockerfile configured. Ready to deploy.
+
+**Deliverables:**
+- ✅ Dockerfile with multi-stage build (`apps/api/Dockerfile`)
+- ✅ .dockerignore for efficient builds
+- ✅ Health check endpoint: `/health`
+- ✅ Environment variable configuration
+
+#### Pre-Deployment Checklist
+- [x] Express API fully implemented
+- [x] React frontend fully implemented
+- [x] Dockerfile ready for Cloud Run
+- [ ] Firebase CLI installed: `npm install -g firebase-tools`
+- [ ] Cloud Run permissions verified
+- [ ] Environment variables gathered (DATABASE_URL, Firebase creds)
+
+#### Deployment Commands
+
+**1. Deploy API to Cloud Run (with Cloud Build)**
+```bash
+gcloud run deploy myapp-api \
+  --source . \
+  --region us-central1 \
+  --set-env-vars DATABASE_URL="postgresql://appuser:***@35.192.50.153:5432/myapp" \
+  --set-env-vars FIREBASE_PROJECT_ID="my-system-template" \
+  --set-env-vars FIREBASE_PRIVATE_KEY="$(cat path/to/private-key.json)" \
+  --set-env-vars FIREBASE_CLIENT_EMAIL="firebase-service@my-system-template.iam.gserviceaccount.com" \
+  --allow-unauthenticated
+```
+
+**2. Build and Deploy Frontend to Firebase Hosting**
+```bash
+npm run build -w web
+firebase deploy --only hosting
+```
+Set `VITE_API_BASE_URL` environment variable in `apps/web/.env` before build.
+
+**3. Verify Deployment**
+```bash
+# API health check
+curl https://myapp-api-xxxxx.run.app/health
+# Response: {"status":"ok"}
+
+# Frontend
+# Visit https://myapp.web.app and test login
+```
+
+**4. Post-Deployment**
+- Enable Cloud Run service account (deferred from Phase 1)
+- Monitor logs: `gcloud run logs read myapp-api`
+- Test end-to-end: Frontend → API → Database
 
 ---
 
