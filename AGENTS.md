@@ -267,17 +267,24 @@ npx prisma db seed       # seed local DB
 
 ### Phase 1 — Parallel (all agents independent)
 
-#### Agent 1: Terraform Infrastructure
-- [ ] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
-- [ ] Run `terraform init` → `terraform plan` → `terraform apply`
-- [ ] Output `DATABASE_URL` and credentials
-- **Deliverable:** Cloud SQL Postgres instance, service account for Cloud Run
+**Status:** Agent 1 ✅ COMPLETE — Database ready. Agent 3 & 5 active (independent work).
 
-#### Agent 3: Database / Prisma
-- [ ] Wait for `DATABASE_URL` from Agent 1
+#### Agent 1: Terraform Infrastructure ✅ COMPLETE
+- [x] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
+- [x] Run `terraform init` → `terraform plan` → `terraform apply`
+- [x] Output `DATABASE_URL` and credentials
+- **Deliverable:** Cloud SQL Postgres instance (ready), service account (deferred to Phase 2)
+- **Outputs:**
+  - `DATABASE_URL`: `postgresql://appuser:***@35.192.50.153:5432/myapp`
+  - `database_connection_name`: `my-system-template:us-central1:myapp-db`
+  - **Stacked PRs:** #2, #3, #4 (gitignore, setup, config)
+
+#### Agent 3: Database / Prisma 🚀 IN PROGRESS
+- [x] Wait for `DATABASE_URL` from Agent 1 ← **Ready!**
 - [ ] Run `npx prisma migrate dev`
 - [ ] Create seed script (`prisma/seed.ts`)
 - **Deliverable:** Migrations applied, seeded data ready
+- **DATABASE_URL:** `postgresql://appuser:***@35.192.50.153:5432/myapp`
 
 #### Agent 5: Integrations
 - [ ] Create Stripe webhook receiver stub
