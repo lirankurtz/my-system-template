@@ -29,6 +29,15 @@ build/
 prisma/dev.db
 prisma/dev.db-journal
 
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/.terraform.lock.hcl
+infra/terraform/.terraform.tfstate.lock.info
+infra/terraform/terraform.tfstate*
+infra/terraform/tfplan
+infra/terraform/*.tfvars
+!infra/terraform/terraform.tfvars.example
+
 # Logs
 logs/
 *.log

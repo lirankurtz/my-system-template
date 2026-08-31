@@ -267,7 +267,13 @@ npx prisma db seed       # seed local DB
 
 ### Phase 1 — Parallel (all agents independent)
 
-**Status:** Agent 1 ✅ COMPLETE, Agent 3 ✅ COMPLETE — Database schema ready. Agent 5 active (independent work).
+**Status:** Agent 1 ✅ COMPLETE, Agent 3 ✅ COMPLETE, Agent 5 ✅ COMPLETE — Database schema & integrations ready.
+
+**Summary:** 
+- Agent 1 has provisioned Cloud SQL Postgres and published DATABASE_URL
+- Agent 3 has created database schema and migrations (PR #7)
+- Agent 5 has created all three integration stubs (stripe, llm, email) and published PR #6
+- Agent 2 can now begin API implementation with database and integrations ready
 
 #### Agent 1: Terraform Infrastructure ✅ COMPLETE
 - [x] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
@@ -287,11 +293,12 @@ npx prisma db seed       # seed local DB
 - **Next Steps:** Apply migration with `npx prisma migrate deploy` using proper DATABASE_URL
 - **Stacked PR:** #5 (Database schema + seed)
 
-#### Agent 5: Integrations
-- [ ] Create Stripe webhook receiver stub
-- [ ] Create LLM provider-agnostic wrapper
-- [ ] Create email abstraction (Resend/SendGrid)
-- **Deliverable:** Typed integration clients in `/integrations`
+#### Agent 5: Integrations ✅ COMPLETE
+- [x] Create Stripe webhook receiver stub (`@myapp/stripe` — idempotency support)
+- [x] Create LLM provider-agnostic wrapper (`@myapp/llm` — OpenAI, Anthropic, Gemini, local)
+- [x] Create email abstraction (`@myapp/email` — Resend, SendGrid)
+- **Deliverable:** Typed integration clients in `/integrations` (all 3 packages, built and type-checked)
+- **Stacked PR:** #6 (stripe, llm, email integration packages)
 
 ### Phase 2 — Agent 2 (unblocked after Phase 1)
 - Express app wired to real DB

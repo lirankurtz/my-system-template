@@ -6,10 +6,11 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "gcs" {
-    bucket = "my-system-template-tf-state"
-    prefix = "prod"
-  }
+  # TODO: Migrate to GCS backend after initial setup
+  # backend "gcs" {
+  #   bucket = "my-system-template-tf-state"
+  #   prefix = "prod"
+  # }
 }
 
 provider "google" {
@@ -37,8 +38,8 @@ resource "google_sql_database_instance" "main" {
     }
 
     ip_configuration {
-      require_ssl                = true
-      enable_private_path_access = false
+      require_ssl = true
+      ipv4_enabled = true
       authorized_networks {
         name  = "allow-all"
         value = "0.0.0.0/0"
@@ -64,10 +65,11 @@ resource "random_password" "db_password" {
 }
 
 # Service account for Cloud Run API
-resource "google_service_account" "cloud_run" {
-  account_id   = "cloud-run-api"
-  display_name = "Cloud Run API Service Account"
-}
+# TODO: Create in Phase 2 (requires elevated IAM permissions)
+# resource "google_service_account" "cloud_run" {
+#   account_id   = "cloud-run-api"
+#   display_name = "Cloud Run API Service Account"
+# }
 
 # Cloud Run Service (placeholder - Agent 2 will populate this)
 # resource "google_cloud_run_service" "api" {
