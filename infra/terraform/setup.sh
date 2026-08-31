@@ -12,18 +12,17 @@ echo "=========================================="
 echo "Terraform Setup for $PROJECT_ID"
 echo "=========================================="
 
-# 1. Create GCS bucket for Terraform state
+# 1. Set up Google Cloud authentication
 echo ""
-echo "Step 1: Creating GCS bucket for Terraform state..."
-if gsutil ls -b gs://$STATE_BUCKET &>/dev/null; then
-  echo "✓ Bucket $STATE_BUCKET already exists"
-else
-  echo "Creating bucket $STATE_BUCKET..."
-  gsutil mb -p $PROJECT_ID -l $REGION gs://$STATE_BUCKET
-  echo "✓ Bucket created successfully"
+echo "Step 1: Setting up Google Cloud authentication..."
+if [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
+  export GOOGLE_APPLICATION_CREDENTIALS="../terraform-sa.json"
+  echo "Using service account: $GOOGLE_APPLICATION_CREDENTIALS"
 fi
+echo "✓ GCP auth configured"
 
 # 2. Initialize Terraform
+# Note: Using local backend for now (GCS backend will be configured after initial setup)
 echo ""
 echo "Step 2: Initializing Terraform..."
 terraform init
@@ -31,7 +30,7 @@ echo "✓ Terraform initialized"
 
 # 3. Plan infrastructure
 echo ""
-echo "Step 3: Planning infrastructure..."
+echo "Step 3: Planning infrastructure (creating tfplan)..."
 terraform plan -out=tfplan
 echo "✓ Plan generated (saved to tfplan)"
 

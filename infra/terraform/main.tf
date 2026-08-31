@@ -6,10 +6,11 @@ terraform {
       version = "~> 5.0"
     }
   }
-  backend "gcs" {
-    bucket = "my-system-template-tf-state"
-    prefix = "prod"
-  }
+  # TODO: Migrate to GCS backend after initial setup
+  # backend "gcs" {
+  #   bucket = "my-system-template-tf-state"
+  #   prefix = "prod"
+  # }
 }
 
 provider "google" {
@@ -37,8 +38,8 @@ resource "google_sql_database_instance" "main" {
     }
 
     ip_configuration {
-      require_ssl                = true
-      enable_private_path_access = false
+      require_ssl = true
+      ipv4_enabled = true
       authorized_networks {
         name  = "allow-all"
         value = "0.0.0.0/0"
