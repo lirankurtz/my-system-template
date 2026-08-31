@@ -273,7 +273,15 @@ npx prisma db seed       # seed local DB
 - Agent 1 has provisioned Cloud SQL Postgres and published DATABASE_URL
 - Agent 3 has created database schema and migrations (PR #7)
 - Agent 5 has created all three integration stubs (stripe, llm, email) and published PR #6
-- Agent 2 can now begin API implementation with database and integrations ready
+
+### Phase 2 Progress
+
+**Status:** Agent 2 ✅ COMPLETE — API implementation ready (PR #8).
+
+**Summary:**
+- Agent 2 has built Express API with Firebase auth middleware and all 5 route handlers
+- All endpoints tested and type-checked, ready for frontend consumption
+- Agent 4 (Frontend) can now begin React implementation with stable API contract
 
 #### Agent 1: Terraform Infrastructure ✅ COMPLETE
 - [x] Create GCS bucket for Terraform state: `gsutil mb gs://my-system-template-tf-state`
@@ -300,17 +308,22 @@ npx prisma db seed       # seed local DB
 - **Deliverable:** Typed integration clients in `/integrations` (all 3 packages, built and type-checked)
 - **Stacked PR:** #6 (stripe, llm, email integration packages)
 
-### Phase 2 — Agent 2 (unblocked after Phase 1)
-- Express app wired to real DB
-- Firebase auth middleware
-- All routes implemented against contract
-- **Blockers:** DATABASE_URL from Agent 1
+### Phase 2 — Agent 2 ✅ COMPLETE
+- [x] Express app wired to real DB (Prisma client connected)
+- [x] Firebase auth middleware (verifies ID tokens, auto-provisions users)
+- [x] All routes implemented against contract (5 endpoints: users GET/PUT, chat GET/GET/:id, POST/:id)
+- [x] Error handling with ApiResponse<T> envelope and consistent error codes
+- [x] Authorization checks (room membership validation)
+- [x] Type-safe throughout, builds and tests pass
+- **Deliverable:** Express API server with Firebase auth and all route handlers
+- **Stacked PR:** #8 (API implementation, ready to merge)
 
-### Phase 3 — Agent 4 (unblocked after Phase 2)
-- React shell + auth context
+### Phase 3 — Agent 4 (unblocked — API ready)
+- React shell + Firebase Auth context
 - Protected routes
-- API client layer consuming `@myapp/shared` contract
-- **Blockers:** API endpoints from Agent 2
+- API client layer consuming `@myapp/shared` contract + API endpoints
+- Real-time updates (SSE, Firestore listeners, or polling)
+- **Blockers:** None — API endpoints live and testable at `http://localhost:8080/api/*`
 
 ---
 
