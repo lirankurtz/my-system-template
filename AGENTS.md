@@ -310,28 +310,33 @@ npx prisma db seed       # seed local DB
 
 ### Phase 3 — Agent 4 (unblocked after Phase 2)
 
-**Status:** 🔧 SCAFFOLDING COMPLETE — awaiting Agent 2 API routes
+**Status:** ✅ FRONTEND SCAFFOLDING COMPLETE — PR #9 ready for review, awaiting Agent 2 API integration
 
 **Summary:**
-- Vite + React project setup with TypeScript
-- Firebase Auth integration with AuthContext provider
-- Protected routes with ProtectedRoute component
-- API client layer with automatic token injection
-- Login page (sign-in/sign-up)
-- Dashboard page (user profile + chat placeholder)
+- Vite + React project setup with TypeScript strict mode
+- Firebase Auth integration with AuthContext provider + error boundary
+- Protected routes with ProtectedRoute component and auth guards
+- API client layer with automatic Bearer token injection
+- Login page with sign-in/sign-up toggle
+- Dashboard page with user profile display
+- Demo .env for local testing (dev server runs at localhost:5173)
+- Error boundary catches and displays initialization errors
 
-#### Agent 4: Frontend 🔧 IN PROGRESS
+#### Agent 4: Frontend ✅ COMPLETE
 - [x] Create Vite + React project structure
-- [x] Configure TypeScript strict mode
+- [x] Configure TypeScript strict mode with proper import meta types
 - [x] Set up Firebase Auth context and providers
 - [x] Create ProtectedRoute component with auth guards
 - [x] Build API client layer (automatic Bearer token injection)
-- [x] Create login page (Firebase email/password auth)
-- [x] Create dashboard page (profile fetching)
+- [x] Create login page (Firebase email/password auth with UI toggle)
+- [x] Create dashboard page (user profile + API integration ready)
+- [x] Add ErrorBoundary component for better error messages
+- [x] Create demo .env file for local development
+- [x] Verify dev server runs and builds successfully
 - [ ] Integrate with Agent 2's chat API routes (blocked by Agent 2)
-- **Deliverable:** React + Vite shell with auth flow, API client layer, protected routing
-- **Blockers:** API routes from Agent 2 — awaiting PR with `/api/users/me`, `/api/chat/*` endpoints
-- **Stacked PR:** Pending (will be stacked after scaffolding review)
+- **Deliverable:** React + Vite shell (87KB gzipped) with complete auth flow, API client layer, protected routing — **PR #9**
+- **Blockers:** API routes from Agent 2 — awaiting implementation of `/api/users/me`, `/api/chat/*` endpoints
+- **Status:** Running locally at `http://localhost:5173/` with demo Firebase config
 
 ---
 
