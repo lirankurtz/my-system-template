@@ -15,7 +15,7 @@ This file is the single source of truth for all Claude Code agents working on th
 | Auth | Firebase Auth |
 | Real-time | Firestore (chat/presence) or SSE |
 | Infra | Terraform → GCP |
-| Hosting | Cloud Run (API), Vercel or Firebase Hosting (web) |
+| Hosting | Cloud Run (API), Firebase Hosting (web) |
 | Monorepo | npm workspaces |
 
 ---
@@ -354,6 +354,34 @@ npx prisma db seed       # seed local DB
 - **PR:** #9 (Phase 3: Agent 4 - React + Vite frontend)
 - **Dev Server:** http://localhost:5173
 - **Stacked PR:** Pending (will be stacked after scaffolding review)
+
+### Phase 4 — Deployment 🚀 READY
+
+**Status:** Code complete. Ready to deploy.
+
+#### Deployment Steps
+
+**1. Backend (Express API → Cloud Run)**
+- Create service account with Cloud Run Admin permissions
+- Build and push Docker image to Artifact Registry
+- Deploy to Cloud Run with environment variables:
+  - `DATABASE_URL` (from Terraform outputs)
+  - `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL`
+- Verify: `curl https://myapp-api-xxxxx.run.app/health`
+
+**2. Frontend (React → Firebase Hosting)**
+- Run `npm run build` in `apps/web`
+- Deploy to Firebase Hosting:
+  - `firebase init hosting` (if not done)
+  - Update `firebase.json` to point to dist folder
+  - Set environment variable: `VITE_API_BASE_URL=https://myapp-api-xxxxx.run.app`
+  - `firebase deploy --only hosting`
+- Verify: Visit `https://myapp.web.app` and test login flow
+
+**3. Post-Deployment**
+- Enable Cloud Run service account (deferred from Phase 1)
+- Test end-to-end: Frontend → API → Database
+- Monitor logs in GCP Console
 
 ---
 
