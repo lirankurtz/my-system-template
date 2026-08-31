@@ -304,13 +304,34 @@ npx prisma db seed       # seed local DB
 - Express app wired to real DB
 - Firebase auth middleware
 - All routes implemented against contract
-- **Blockers:** DATABASE_URL from Agent 1
+- **Blockers:** DATABASE_URL from Agent 1 ✅ Ready
+
+**Status:** ⏳ IN PROGRESS — awaiting Agent 2 implementation
 
 ### Phase 3 — Agent 4 (unblocked after Phase 2)
-- React shell + auth context
-- Protected routes
-- API client layer consuming `@myapp/shared` contract
-- **Blockers:** API endpoints from Agent 2
+
+**Status:** 🔧 SCAFFOLDING COMPLETE — awaiting Agent 2 API routes
+
+**Summary:**
+- Vite + React project setup with TypeScript
+- Firebase Auth integration with AuthContext provider
+- Protected routes with ProtectedRoute component
+- API client layer with automatic token injection
+- Login page (sign-in/sign-up)
+- Dashboard page (user profile + chat placeholder)
+
+#### Agent 4: Frontend 🔧 IN PROGRESS
+- [x] Create Vite + React project structure
+- [x] Configure TypeScript strict mode
+- [x] Set up Firebase Auth context and providers
+- [x] Create ProtectedRoute component with auth guards
+- [x] Build API client layer (automatic Bearer token injection)
+- [x] Create login page (Firebase email/password auth)
+- [x] Create dashboard page (profile fetching)
+- [ ] Integrate with Agent 2's chat API routes (blocked by Agent 2)
+- **Deliverable:** React + Vite shell with auth flow, API client layer, protected routing
+- **Blockers:** API routes from Agent 2 — awaiting PR with `/api/users/me`, `/api/chat/*` endpoints
+- **Stacked PR:** Pending (will be stacked after scaffolding review)
 
 ---
 
