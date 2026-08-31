@@ -10,6 +10,7 @@
   "scripts": {
     "dev:api": "npm run dev -w @myapp/api",
     "dev:web": "npm run dev -w @myapp/web",
-    "build": "npm run build -w @myapp/api && npm run build -w @myapp/web"
+    "build": "npm run build -w @myapp/api && npm run build -w @myapp/web",
+    "test": "find . -path './node_modules' -prune -o -path '*/src/test/*.test.ts' -type f -print | xargs -I {} node --loader ts-node/esm {}"
   }
 }
