@@ -1,0 +1,29 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/myapp-api:latest'
+      - '-f'
+      - 'apps/api/Dockerfile'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/myapp-api:latest'
+
+  - name: 'gcr.io/cloud-builders/run'
+    args:
+      - 'deploy'
+      - 'myapp-api'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/myapp-api:latest'
+      - '--region'
+      - 'us-central1'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'DATABASE_URL=postgresql://appuser:31:pW4(<4nj[ryOJ@X@Ni&[GiDC6>70]@35.192.50.153:5432/myapp,FIREBASE_PROJECT_ID=my-system-template-fd744,FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@my-system-template-fd744.iam.gserviceaccount.com,FIREBASE_PRIVATE_KEY=YOUR_PRIVATE_KEY_HERE'
+
+images:
+  - 'gcr.io/$PROJECT_ID/myapp-api:latest'
